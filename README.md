@@ -126,17 +126,17 @@ Backend never receives private keys.
 
 # ⚙ Environment Variables
 
-SOLANA_RPC=
-SOLANATRACKER_RPC=
-SOLANATRACKER_API_KEY=
+SOLANA_RPC=\
+SOLANATRACKER_RPC=\
+SOLANATRACKER_API_KEY=\
 HELIUS_API_KEY=
 
 JUPITER_ULTRA_API_KEY=
 
-UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_URL=\
 UPSTASH_REDIS_REST_TOKEN=
 
-MAIN_WALLET_ADDRESS=
+MAIN_WALLET_ADDRESS=\
 MAIN_WALLET_PRIVATE=
 
 SPL_MINT=
@@ -166,7 +166,7 @@ Each wallet executes with \~300ms stagger.
 
 ## Requirements
 
--   Node.js 20+
+-   Node.js 18+
 -   Vercel account
 -   Solana RPC endpoint
 -   Jupiter Ultra API key
@@ -174,7 +174,7 @@ Each wallet executes with \~300ms stagger.
 
 ## Setup
 
-git clone `<https://github.com/pepeskull/stak.fun.git>`{=html}\
+git clone `<repo-url>`{=html}\
 cd project\
 npm install
 
