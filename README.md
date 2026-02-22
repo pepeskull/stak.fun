@@ -1,250 +1,266 @@
-# 🚀 Stak.fun Wallet Bundler
+# Stak.fun Wallet Bundler
 
-```{=html}
-<p align="center">
-```
-`<b>`{=html}Client-Side Multi-Wallet Solana Bundle
-Executor`</b>`{=html}`<br>`{=html} Powered by Jupiter Ultra Routing •
-Sequential Execution • Access-Gated Infrastructure
-```{=html}
-</p>
-```
+A **client-side Solana multi-wallet bundle executor** powered by
+**Jupiter Ultra routing**, designed for advanced users who need precise
+execution control, distributed wallet swaps, and predictable transaction
+orchestration.
 
 ------------------------------------------------------------------------
 
-## 📌 Overview
+# Overview
 
-Stak.fun is a **client-side Solana multi-wallet bundle executor**
-designed for advanced users who require:
+Stak.fun is not just a swap interface.
 
--   Deterministic execution ordering
--   Distributed wallet entries
--   Liquidity-sensitive swaps
--   RPC-safe transaction orchestration
--   Time-gated access control
+It is a:
 
-This is not a typical swap UI --- it is a structured execution engine.
+> Client-side Solana bundle executor with Ultra routing, sequential
+> orchestration, and server-verified time-gated access control.
+
+Designed for:
+
+-   Multi-wallet coordinated buys\
+-   Controlled execution stacking\
+-   Liquidity-sensitive entries\
+-   RPC-safe sequential swaps\
+-   Advanced Solana users
 
 ------------------------------------------------------------------------
 
-## ✨ Key Features
+# Core Features
 
-### 🔑 Client-Side Key Management
+## Client-Side Key Handling
 
--   Private keys never leave the browser
--   No key storage
--   No backend transmission
--   Signing happens locally via `@solana/web3.js` + `tweetnacl`
+-   Private keys are never stored
+-   Private keys are never sent to backend
+-   Signing occurs fully in-browser
+-   Backend only receives signed serialized transactions
 
-### 👛 Multi-Wallet Stack System
+------------------------------------------------------------------------
+
+## Multi-Wallet Stack System
 
 -   1 Active wallet
 -   Up to 15 Stack wallets (16 total)
--   Drag-handle-only ordering (SortableJS)
--   Deterministic execution:
+-   Drag-handle only reordering (SortableJS)
 
-```{=html}
-<!-- -->
-```
-    Stack wallets (top → bottom)
-    Active wallet executes last
+Execution order:
 
-### 🔄 Jupiter Ultra Integration
-
--   Uses **Jupiter Ultra API**
--   Backend proxy protects API keys
--   Higher routing reliability
--   Improved liquidity handling
-
-### 📊 Real-Time Execution Modal
-
--   Per-wallet status updates
--   Solscan links on success
--   Ambiguous RPC simulation errors marked as "Pending"
--   Automatic skip for insufficient balances
-
-### 🕒 Time-Limited Access Gate
-
--   Redis-based access control
--   Expiry timestamps per wallet
--   Optional top-ups
--   Optional SPL token validation
--   Service wallet payment verification
+Stack wallets (top → bottom)\
+Active wallet executes last
 
 ------------------------------------------------------------------------
 
-## 🏗 Architecture
+## Jupiter Ultra Integration
 
-### Frontend
+Uses **Jupiter Ultra API** (not public routing):
+
+-   Advanced routing engine
+-   Higher reliability under load
+-   Better liquidity pathing
+-   Reduced failed swaps
+
+Ultra endpoints are proxied via backend to protect the API key.
+
+------------------------------------------------------------------------
+
+## Real-Time Execution Feedback
+
+-   Per-wallet status tracking
+-   Solscan links on success
+-   Ambiguous RPC simulation errors treated as "Pending"
+-   Wallets without sufficient funds are skipped automatically
+
+------------------------------------------------------------------------
+
+## Time-Limited Access Gate
+
+Includes a server-verified access control system:
+
+-   Time-based usage windows
+-   Optional top-ups
+-   Access state stored in Redis
+-   Payment verification via service wallet
+-   Optional token-based validation (SPL mint support)
+
+Access must be valid before swap execution.
+
+------------------------------------------------------------------------
+
+# Architecture
+
+## Frontend
 
 -   Vanilla JavaScript
 -   `@solana/web3.js`
 -   `tweetnacl`
 -   `SortableJS`
 
-All transaction construction and signing occur locally.
+All transaction construction and signing happens locally.
 
-### Backend (Vercel Serverless Functions)
+## Backend (Vercel Serverless Functions)
 
 -   Jupiter Ultra proxy
--   Signed transaction relay
--   Access validator (Redis)
--   Payment verification (service wallet)
--   Metadata + balance lookup endpoints
+-   Transaction relay
+-   Access validator
+-   Payment verifier
+-   Metadata fetcher
+-   Redis session manager
 
-Backend never accesses private keys.
-
-------------------------------------------------------------------------
-
-## 📂 Project Structure
-
-    /
-    ├── app.js
-    └── api/
-        ├── new-address.js
-        ├── sol-balance.js
-        ├── token-balance.js
-        ├── token-supply.js
-        ├── ultra-order.js
-        ├── ultra-execute.js
-        └── send-tx.js
+Backend never receives private keys.
 
 ------------------------------------------------------------------------
 
-## ⚙ Environment Variables
+# Project Structure
 
-    SOLANA_RPC=
-    SOLANATRACKER_RPC=
-    SOLANATRACKER_API_KEY=
-    HELIUS_API_KEY=
-
-    JUPITER_ULTRA_API_KEY=
-
-    UPSTASH_REDIS_REST_URL=
-    UPSTASH_REDIS_REST_TOKEN=
-
-    MAIN_WALLET_ADDRESS=
-    MAIN_WALLET_PRIVATE=
-
-    SPL_MINT=
+/ ├── app.js\
+└── api/\
+    ├── new-address.js\
+    ├── sol-balance.js\
+    ├── token-balance.js\
+    ├── token-supply.js\
+    ├── ultra-order.js\
+    ├── ultra-execute.js\
+    └── send-tx.js
 
 ------------------------------------------------------------------------
 
-## 🔁 Execution Flow
+# Environment Variables
+
+SOLANA_RPC=\
+SOLANATRACKER_RPC=\
+SOLANATRACKER_API_KEY=\
+HELIUS_API_KEY=
+
+JUPITER_ULTRA_API_KEY=
+
+UPSTASH_REDIS_REST_URL=\
+UPSTASH_REDIS_REST_TOKEN=
+
+MAIN_WALLET_ADDRESS=\
+MAIN_WALLET_PRIVATE=
+
+SPL_MINT=
+
+------------------------------------------------------------------------
+
+# Execution Flow
 
 For each wallet:
 
-1.  Validate Redis access window
+1.  Validate access (Redis check)
 2.  Fetch Jupiter Ultra quote
-3.  Request unsigned transaction
-4.  Deserialize in browser
+3.  Build transaction via Ultra API
+4.  Deserialize transaction in browser
 5.  Sign locally
-6.  Send signed tx to `/api/send-tx`
-7.  Backend relays via `sendRawTransaction`
-8.  Return signature
-9.  Update UI state
+6.  Send signed transaction to backend
+7.  Backend relays via RPC
+8.  Signature returned
+9.  UI updates status
+10. Solscan link displayed
 
-Each wallet executes with \~300ms stagger to reduce RPC collision and
-liquidity race conditions.
+Each wallet executes with \~300ms stagger.
 
 ------------------------------------------------------------------------
 
-## 🖥 Self-Hosting
+# Self-Hosting Guide
 
-### Requirements
+## Requirements
 
--   Node.js 18+
--   Vercel account (or serverless platform)
+-   Node.js 20+
+-   Vercel account
 -   Solana RPC endpoint
 -   Jupiter Ultra API key
--   Upstash Redis instance
+-   Upstash Redis
 
-### Setup
+## Setup
 
-``` bash
-git clone <repo-url>
-cd project
-npm install
+- git clone https://github.com/pepeskull/stak.fun.git
+- cd project
+- npm install
+
+Configure environment variables and deploy:
+
 vercel deploy
-```
 
-### Production Hardening
+### Security Notes
 
--   Use private RPC
--   Add rate limiting
--   Restrict CORS origins
--   Protect environment variables
--   Monitor RPC reliability
+-   Never expose server-side keys
+-   Use private RPC endpoint
+-   Restrict origins
+-   Consider rate limiting
 
 ------------------------------------------------------------------------
 
-## 🧠 Developer Deep Dive
+# Developer Deep-Dive
 
-### Why Sequential Execution?
+## Swap Lifecycle
 
-Parallel swaps can cause: - Liquidity invalidation - Route recalculation
-failure - RPC rate limiting - Blockhash conflicts
+1.  Fetch metadata
+2.  Fetch balances
+3.  Fetch Ultra quote
+4.  Build unsigned tx
+5.  Sign locally
+6.  Relay to backend
+7.  Receive signature
 
-Sequential staggered execution ensures deterministic behavior.
+Sequential execution prevents:
 
-### Ultra Proxy Model
-
-Frontend never contacts Jupiter Ultra directly:
-
-    Frontend → /api/ultra-order → Jupiter Ultra
-    Frontend → /api/ultra-execute → Jupiter Ultra
-
-API keys remain server-side only.
+-   Liquidity race conditions
+-   Blockhash conflicts
+-   RPC overload
 
 ------------------------------------------------------------------------
 
-## 🛡 Security Overview
+# Security Overview
 
-### Key Isolation
+## Key Management
 
 -   Keys exist only in browser memory
 -   Never transmitted
 -   Never logged
 
-### Transaction Integrity
+## Backend Limitations
 
--   Backend receives fully signed transactions
--   Cannot modify instructions
--   Cannot re-sign or alter swaps
+Backend cannot:
 
-### Redis Access Model
+-   Modify transactions
+-   Re-sign transactions
+-   Access user keys
 
-    wallet_address → expiry_timestamp
+## Redis Model
 
-Access enforced server-side.
+wallet_address → expiry_timestamp
 
-### Trust Model
+## Trust Model
 
-User must trust: - Backend relay integrity - Jupiter Ultra routing
-correctness - RPC provider reliability
+User trusts:
 
-User does NOT need to trust: - Backend with private keys - Backend with
-swap logic - Backend with custody of funds
+-   Backend relay integrity
+-   Jupiter Ultra routing
+-   RPC provider
+
+User does NOT trust backend with private keys or funds.
 
 ------------------------------------------------------------------------
 
-## ⚠ Known Limitations
+# Limitations
 
+-   No wallet adapter support
 -   No hardware wallet support
--   No wallet adapter integration (intentional)
 -   Sequential execution only
--   Requires sufficient SOL for ATA + fees
--   Dependent on Jupiter Ultra uptime
+-   Dependent on Jupiter Ultra availability
+-   Requires active access window
 
 ------------------------------------------------------------------------
 
-## 🛠 Development
+# Development
 
-    npm install
-    vercel dev
+npm install
+
+Deploy via Vercel.
 
 ------------------------------------------------------------------------
 
-## 📄 License
+# License
 
 MIT
