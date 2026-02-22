@@ -174,9 +174,9 @@ Each wallet executes with \~300ms stagger.
 
 ## Setup
 
-git clone https://github.com/pepeskull/stak.fun.git
-cd project\
-npm install
+- git clone https://github.com/pepeskull/stak.fun.git
+- cd project
+- npm install
 
 Configure environment variables and deploy:
 
