@@ -1,266 +1,249 @@
-# Stak.fun Wallet Bundler
+# stak.fun
 
-A **client-side Solana multi-wallet bundle executor** powered by
-**Jupiter Ultra routing**, designed for advanced users who need precise
-execution control, distributed wallet swaps, and predictable transaction
-orchestration.
+I’m bringing bundling back. Not as a hype product. Not as a paid “alpha tool.” Just as a simple execution tool.
 
-------------------------------------------------------------------------
+Bundling is one of the most important tools during a token launch, but today it is either too expensive, too complicated or built in a way that forces you to trust someone else with your keys.
+So I built stak.fun, a client-side Solana multi-wallet bundle executor. It lets you execute swaps from multiple wallets using Jupiter Ultra routing.
+It is made for traders, devs and launch teams who want control over execution.
 
-# Overview
+---
 
-Stak.fun is not just a swap interface.
+## why bundling matters
 
-It is a:
+When a token launches everything happens very fast. Snipers enter immediately, liquidity changes in seconds and distribution becomes messy. The chart can look broken before the project even starts. Many teams lose control in this moment.
 
-> Client-side Solana bundle executor with Ultra routing, sequential
-> orchestration, and server-verified time-gated access control.
+Bundling helps reduce that chaos. Instead of doing one large buy from one wallet, you can split buys across many wallets and execute them one by one in order. This creates better distribution and avoids extreme imbalance in early trading.
 
-Designed for:
+It does not remove risk or stop snipers, but it gives you more structure and more control.
 
--   Multi-wallet coordinated buys\
--   Controlled execution stacking\
--   Liquidity-sensitive entries\
--   RPC-safe sequential swaps\
--   Advanced Solana users
+---
 
-------------------------------------------------------------------------
+## what this tool does
 
-# Core Features
+stak.fun allows you to use up to 16 wallets at the same time. Execution is sequential on purpose with a small delay between each wallet (~300ms).
+Parallel execution may look faster, but it causes problems:
 
-## Client-Side Key Handling
+* liquidity can move between swaps
+* blockhash can expire
+* RPC can rate limit you
+* some wallets can fail while others succeed
 
--   Private keys are never stored
--   Private keys are never sent to backend
--   Signing occurs fully in-browser
--   Backend only receives signed serialized transactions
+Sequential execution is more stable and more predictable.
 
-------------------------------------------------------------------------
+All transactions are built and signed inside your browser. The backend only receives signed transactions and sends them to the RPC.
 
-## Multi-Wallet Stack System
+The backend never has your private keys.
 
--   1 Active wallet
--   Up to 15 Stack wallets (16 total)
--   Drag-handle only reordering (SortableJS)
+---
 
-Execution order:
+## how execution works
 
-Stack wallets (top → bottom)\
-Active wallet executes last
+For each wallet:
 
-------------------------------------------------------------------------
+1. The system checks if the wallet has valid access (stored in Redis).
+2. A Jupiter Ultra quote is requested.
+3. An unsigned transaction is created.
+4. The transaction is loaded in your browser.
+5. The wallet signs it locally.
+6. The signed transaction is sent to the backend.
+7. The backend sends it to the RPC.
+8. The transaction signature is returned.
+9. The UI updates and shows a Solscan link.
 
-## Jupiter Ultra Integration
+If a wallet does not have enough balance, it is skipped automatically.
+If the RPC gives unclear simulation errors, the transaction is marked as pending instead of failed, because Solana RPC can sometimes be inconsistent during high load.
 
-Uses **Jupiter Ultra API** (not public routing):
+The goal is stable execution, not maximum speed.
 
--   Advanced routing engine
--   Higher reliability under load
--   Better liquidity pathing
--   Reduced failed swaps
+---
 
-Ultra endpoints are proxied via backend to protect the API key.
+## private keys and security
 
-------------------------------------------------------------------------
+Your private keys:
 
-## Real-Time Execution Feedback
+* are never stored
+* are never sent to the backend
+* are never logged
 
--   Per-wallet status tracking
--   Solscan links on success
--   Ambiguous RPC simulation errors treated as "Pending"
--   Wallets without sufficient funds are skipped automatically
+They only exist in your browser memory during the session.
 
-------------------------------------------------------------------------
+The backend cannot:
 
-## Time-Limited Access Gate
+* read your keys
+* change your transaction
+* sign on your behalf
+* move your funds
 
-Includes a server-verified access control system:
+It only forwards signed transactions.
 
--   Time-based usage windows
--   Optional top-ups
--   Access state stored in Redis
--   Payment verification via service wallet
--   Optional token-based validation (SPL mint support)
+You trust:
 
-Access must be valid before swap execution.
+* your browser
+* the RPC provider
+* Jupiter Ultra routing
+* the backend relay to forward your transaction honestly
 
-------------------------------------------------------------------------
+You do not give custody to this tool.
 
-# Architecture
+---
 
-## Frontend
+## jupiter ultra
 
--   Vanilla JavaScript
--   `@solana/web3.js`
--   `tweetnacl`
--   `SortableJS`
+This tool uses Jupiter Ultra (not public routing). Ultra gives better routing and better reliability during high activity. The Ultra API key is protected on the backend. It is never exposed to users.
+Routing happens server-side. Signing happens client-side.
 
-All transaction construction and signing happens locally.
+---
 
-## Backend (Vercel Serverless Functions)
+## access control
 
--   Jupiter Ultra proxy
--   Transaction relay
--   Access validator
--   Payment verifier
--   Metadata fetcher
--   Redis session manager
+This tool includes time-based access control.
 
-Backend never receives private keys.
+Access is stored in Redis like this:
 
-------------------------------------------------------------------------
+wallet_address → expiry_timestamp
 
-# Project Structure
+Before swaps run, access is checked.
 
-/ ├── app.js\
-└── api/\
-    ├── new-address.js\
-    ├── sol-balance.js\
-    ├── token-balance.js\
-    ├── token-supply.js\
-    ├── ultra-order.js\
-    ├── ultra-execute.js\
-    └── send-tx.js
+If access is expired, swaps will not execute.
 
-------------------------------------------------------------------------
+The system supports:
 
-# Environment Variables
+* time-based access
+* top-ups
+* payment verification via service wallet
+* optional SPL token validation
 
-SOLANA_RPC=\
-SOLANATRACKER_RPC=\
-SOLANATRACKER_API_KEY=\
+Access must be valid before execution starts.
+
+---
+
+## architecture
+
+### frontend
+
+* Vanilla JavaScript
+* @solana/web3.js
+* tweetnacl
+* SortableJS
+
+All transaction building and signing happens in the browser.
+
+No heavy framework.
+
+---
+
+### backend (vercel serverless)
+
+The backend handles:
+
+* Jupiter Ultra proxy
+* transaction relay
+* access validation
+* payment verification
+* metadata fetching
+* Redis session storage
+
+The backend does not store or manage private keys.
+
+---
+
+## project structure
+
+```
+/
+├── index.html
+├── package.json
+├── style.css
+├── app.js
+└── api/
+    ├── new-address.js
+    ├── sol-balance.js
+    ├── token-balance.js
+    ├── token-supply.js
+    ├── ultra-order.js
+    ├── ultra-execute.js
+    └── send-tx.js
+```
+
+Simple and direct.
+
+---
+
+## environment variables
+
+```
+SOLANA_RPC=
+SOLANATRACKER_RPC=
+SOLANATRACKER_API_KEY=
 HELIUS_API_KEY=
 
 JUPITER_ULTRA_API_KEY=
 
-UPSTASH_REDIS_REST_URL=\
+UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 
-MAIN_WALLET_ADDRESS=\
+MAIN_WALLET_ADDRESS=
 MAIN_WALLET_PRIVATE=
 
 SPL_MINT=
+```
 
-------------------------------------------------------------------------
+If you deploy yourself:
 
-# Execution Flow
+* Use a private RPC
+* Do not expose server keys
+* Restrict origins
+* Consider rate limiting
 
-For each wallet:
+---
 
-1.  Validate access (Redis check)
-2.  Fetch Jupiter Ultra quote
-3.  Build transaction via Ultra API
-4.  Deserialize transaction in browser
-5.  Sign locally
-6.  Send signed transaction to backend
-7.  Backend relays via RPC
-8.  Signature returned
-9.  UI updates status
-10. Solscan link displayed
+## self-hosting
 
-Each wallet executes with \~300ms stagger.
+Requirements:
 
-------------------------------------------------------------------------
+* Node.js 20+
+* Vercel account
+* Solana RPC endpoint
+* Jupiter Ultra API key
+* Upstash Redis
 
-# Self-Hosting Guide
+Setup:
 
-## Requirements
-
--   Node.js 20+
--   Vercel account
--   Solana RPC endpoint
--   Jupiter Ultra API key
--   Upstash Redis
-
-## Setup
-
-- git clone https://github.com/pepeskull/stak.fun.git
-- cd project
-- npm install
-
-Configure environment variables and deploy:
-
-vercel deploy
-
-### Security Notes
-
--   Never expose server-side keys
--   Use private RPC endpoint
--   Restrict origins
--   Consider rate limiting
-
-------------------------------------------------------------------------
-
-# Developer Deep-Dive
-
-## Swap Lifecycle
-
-1.  Fetch metadata
-2.  Fetch balances
-3.  Fetch Ultra quote
-4.  Build unsigned tx
-5.  Sign locally
-6.  Relay to backend
-7.  Receive signature
-
-Sequential execution prevents:
-
--   Liquidity race conditions
--   Blockhash conflicts
--   RPC overload
-
-------------------------------------------------------------------------
-
-# Security Overview
-
-## Key Management
-
--   Keys exist only in browser memory
--   Never transmitted
--   Never logged
-
-## Backend Limitations
-
-Backend cannot:
-
--   Modify transactions
--   Re-sign transactions
--   Access user keys
-
-## Redis Model
-
-wallet_address → expiry_timestamp
-
-## Trust Model
-
-User trusts:
-
--   Backend relay integrity
--   Jupiter Ultra routing
--   RPC provider
-
-User does NOT trust backend with private keys or funds.
-
-------------------------------------------------------------------------
-
-# Limitations
-
--   No wallet adapter support
--   No hardware wallet support
--   Sequential execution only
--   Dependent on Jupiter Ultra availability
--   Requires active access window
-
-------------------------------------------------------------------------
-
-# Development
-
+```
+git clone https://github.com/pepeskull/stak.fun.git
+cd project
 npm install
+```
 
-Deploy via Vercel.
+Then deploy:
 
-------------------------------------------------------------------------
+```
+vercel deploy
+```
 
-# License
+---
+
+## limitations
+
+This tool is focused.
+
+It does not support:
+
+* wallet adapters
+* hardware wallets
+* parallel execution
+* offline signing
+
+It depends on:
+
+* Jupiter Ultra uptime
+* your RPC quality
+* valid access window
+
+This is not a trading terminal. It is an execution tool.
+
+---
+
+## license
 
 MIT
