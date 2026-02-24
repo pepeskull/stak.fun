@@ -6,7 +6,6 @@ Bundling is one of the most important tools during a token launch, but today it 
 So I built stak.fun, a client-side Solana multi-wallet bundle executor. It lets you execute swaps from multiple wallets using Jupiter Ultra routing.
 It is made for traders, devs and launch teams who want control over execution.
 
----
 
 ## why bundling matters
 
@@ -16,7 +15,6 @@ Bundling helps reduce that chaos. Instead of doing one large buy from one wallet
 
 It does not remove risk or stop snipers, but it gives you more structure and more control.
 
----
 
 ## what this tool does
 
@@ -34,7 +32,6 @@ All transactions are built and signed inside your browser. The backend only rece
 
 The backend never has your private keys.
 
----
 
 ## how execution works
 
@@ -55,7 +52,6 @@ If the RPC gives unclear simulation errors, the transaction is marked as pending
 
 The goal is stable execution, not maximum speed.
 
----
 
 ## private keys and security
 
@@ -85,14 +81,12 @@ You trust:
 
 You do not give custody to this tool.
 
----
 
 ## jupiter ultra
 
 This tool uses Jupiter Ultra (not public routing). Ultra gives better routing and better reliability during high activity. The Ultra API key is protected on the backend. It is never exposed to users.
 Routing happens server-side. Signing happens client-side.
 
----
 
 ## access control
 
@@ -115,7 +109,6 @@ The system supports:
 
 Access must be valid before execution starts.
 
----
 
 ## architecture
 
@@ -130,7 +123,6 @@ All transaction building and signing happens in the browser.
 
 No heavy framework.
 
----
 
 ### backend (vercel serverless)
 
@@ -145,7 +137,6 @@ The backend handles:
 
 The backend does not store or manage private keys.
 
----
 
 ## project structure
 
@@ -167,7 +158,6 @@ The backend does not store or manage private keys.
 
 Simple and direct.
 
----
 
 ## environment variables
 
@@ -195,7 +185,6 @@ If you deploy yourself:
 * Restrict origins
 * Consider rate limiting
 
----
 
 ## self-hosting
 
@@ -221,7 +210,6 @@ Then deploy:
 vercel deploy
 ```
 
----
 
 ## limitations
 
@@ -242,7 +230,6 @@ It depends on:
 
 This is not a trading terminal. It is an execution tool.
 
----
 
 ## license
 
